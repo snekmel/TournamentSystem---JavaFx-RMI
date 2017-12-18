@@ -20,7 +20,6 @@ public class ConfigClient extends Application {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("pages/Login/LoginPage.fxml"));
             Parent root = (Parent) fxmlLoader.load();
-            //  LobbyController lobbyController = (LobbyController) fxmlLoader.getController();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Login");
