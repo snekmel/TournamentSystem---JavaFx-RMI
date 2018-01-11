@@ -11,4 +11,20 @@ public class Participant implements Serializable {
         this.name = name;
         this.id = java.util.UUID.randomUUID().toString();
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "Participant{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

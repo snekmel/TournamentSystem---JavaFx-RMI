@@ -1,19 +1,24 @@
 package Server.models;
 
+import Server.repositorys.RegistryRepository;
+import Server.repositorys.TournamentRepository;
+import Server.repositorys.context.TournamentRepositorySQL;
 import Shared.enums.Status;
 import Shared.interfaces.IMatch;
 import Shared.interfaces.ITournament;
 import Shared.interfaces.ITournamentManager;
 import Shared.models.Participant;
+import publisher.IRemotePublisherForDomain;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Tournament extends UnicastRemoteObject implements ITournament {
+public class Tournament extends UnicastRemoteObject implements ITournament,Serializable {
 
     private String id;
     private Status gameStatus;
@@ -22,7 +27,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament {
     private String ownerName;
     private List<Participant> participants;
     private List<Match> matches;
-
+    private List<Participant> winners;
 
     public Tournament() throws RemoteException {
         this.id = java.util.UUID.randomUUID().toString();
@@ -31,6 +36,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament {
         this.matches = new ArrayList<Match>();
         this.tournamentName = this.id;
         this.gameStatus = Status.NotStarted;
+
     }
 
 
@@ -40,8 +46,15 @@ public class Tournament extends UnicastRemoteObject implements ITournament {
         this.startDate = startDate;
         this.tournamentName = tournamentName;
         this.ownerName = ownerName;
+
     }
 
+
+
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
 
     public void setGameStatus(Status gameStatus) {
         this.gameStatus = gameStatus;
@@ -52,31 +65,72 @@ public class Tournament extends UnicastRemoteObject implements ITournament {
     }
 
     public void addParticipant(Participant p) throws RemoteException {
+        try{
+            this.participants.add(p);
+           Registry registry = RegistryRepository.getRmiRegistry();
+           IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
+           publisherForDomain.inform("Participants",null,this.participants);
+
+            TournamentRepository tournamentRepository = new TournamentRepository(new TournamentRepositorySQL());
+            tournamentRepository.updateTournament(this);
+
+        }catch (Exception e){
+            System.out.println(e);
+        }
 
     }
 
     public List<Participant> getParticipants() throws RemoteException {
-        return null;
+        return this.participants;
     }
 
     public void removeParticipant(String id) throws RemoteException {
+        for (Participant p: this.participants
+             ) {
+            if (p.getId().equals(id)){
+                try{
+                    this.participants.remove(p);
+                    Registry registry = RegistryRepository.getRmiRegistry();
+                    IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
+                    publisherForDomain.inform("Participants",null,this.participants);
+                    this.updateTournamentDb();
 
+                }catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        }
     }
 
     public List<IMatch> getMatches() throws RemoteException {
-        return null;
+        List<IMatch> returnList = new ArrayList<>();
+        for (Match match: this.matches
+             ) {
+            returnList.add((IMatch) match);
+        }
+        return returnList;
+
+
     }
 
     public IMatch getMatch(String id) throws RemoteException {
-        return null;
+      IMatch returnMatch = null;
+        for (Match match: this.matches
+             ) {
+            returnMatch = (IMatch) match;
+        }
+      return returnMatch;
+
     }
 
     public void startTournament() throws RemoteException {
-
+        this.winners = this.participants;
+        this.generateMatches();
+        this.gameStatus = Status.Active;
     }
 
     public void finishTournament() throws RemoteException {
-
+        this.gameStatus = Status.Finished;
     }
 
     public String getId() throws RemoteException {
@@ -98,6 +152,49 @@ public class Tournament extends UnicastRemoteObject implements ITournament {
     public String getOwnername() throws RemoteException {
         return this.ownerName;
     }
+
+    private void generateMatches(){
+        int participantsIndex = 0;
+        int matchCount = this.participants.size() / 2;
+        if ((this.participants.size() % 2) ==1){
+            matchCount++;
+        }
+        try{
+            for (int i = 0; i <= (matchCount - 1) ; i++) {
+                if (this.participants.get(participantsIndex) != null && this.participants.get(participantsIndex + 1) !=null){
+                    Match match = new Match(this.participants.get(participantsIndex),this.participants.get(participantsIndex + 1));
+                    this.matches.add(match);
+                }
+                else if( this.participants.get(participantsIndex + 1) !=null){
+                    System.out.println("1 left");
+                }
+            participantsIndex++;
+            participantsIndex++;
+            }
+
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
+        try{
+            Registry registry = RegistryRepository.getRmiRegistry();
+            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
+            publisherForDomain.inform("Matches",null,this.matches);
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
+    }
+
+    private void updateTournamentDb(){
+        try{
+            TournamentRepository tournamentRepository = new TournamentRepository(new TournamentRepositorySQL());
+            tournamentRepository.updateTournament(this);
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
 
     @Override
     public String toString() {

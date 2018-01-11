@@ -25,3 +25,20 @@
 #mainGrid{
     -fx-background-color: #87CEFA;
 }
+
+.scoreboardPlayer1{
+    -fx-background-color: dodgerblue;
+
+}
+.scoreboardPlayer2{
+    -fx-background-color: indianred;
+ }
+
+.plusBtn{
+    -fx-background-color: mediumseagreen;
+}
+
+
+.minBtn{
+    -fx-background-color: red;
+}

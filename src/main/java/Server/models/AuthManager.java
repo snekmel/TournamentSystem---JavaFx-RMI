@@ -38,6 +38,8 @@ public class AuthManager extends UnicastRemoteObject implements IAuthManager{
                     this.authRepository.deleteAccount(id);
                 }
         }
+
+        this.accounts = this.authRepository.getAccounts();
     }
 
 

@@ -1,5 +1,6 @@
 package Shared.interfaces;
 
+import Shared.enums.Status;
 import Shared.models.Participant;
 
 import java.rmi.Remote;
@@ -15,5 +16,9 @@ public interface IMatch extends Remote {
     void endMatch(Participant winner) throws RemoteException;
     Participant getParticipant1() throws RemoteException;
     Participant getParticipant2() throws RemoteException;
-
+    Status getStatus() throws RemoteException;
+    String getId() throws RemoteException;
+    int getPointsParticipant1() throws RemoteException;
+    int getPointsParticipant2() throws RemoteException;
+    Participant getWinner() throws RemoteException;
 }

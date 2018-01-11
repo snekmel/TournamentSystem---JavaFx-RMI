@@ -1,10 +1,14 @@
 package ConfigClient;
 
+import Server.Server;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConfigClient extends Application {
     @Override
@@ -23,7 +27,8 @@ public class ConfigClient extends Application {
             stage.show();
 
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(ConfigClient.class.getName()).log(Level.SEVERE, null, e);
+
         }
     }
 }

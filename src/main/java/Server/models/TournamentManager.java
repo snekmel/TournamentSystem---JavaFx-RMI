@@ -1,8 +1,15 @@
 package Server.models;
 
+import Server.repositorys.RegistryRepository;
+import Server.repositorys.TournamentRepository;
+import Server.repositorys.context.TournamentRepositorySQL;
 import Shared.interfaces.ITournament;
 import Shared.interfaces.ITournamentManager;
+import publisher.IRemotePublisherForDomain;
+import publisher.RemotePublisher;
+
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,19 +17,24 @@ import java.util.List;
 public class TournamentManager extends UnicastRemoteObject implements ITournamentManager {
 
     private List<Tournament> Tournaments;
+    private TournamentRepository tournamentRepository = new TournamentRepository(new TournamentRepositorySQL());
+    private Registry registry = RegistryRepository.getRmiRegistry();
 
     public TournamentManager() throws RemoteException {
+        this.Tournaments = tournamentRepository.getTournaments();
 
-        this.Tournaments = new ArrayList<Tournament>();
-
-        Tournament t1 = new Tournament();
-        Tournament t2 = new Tournament();
-
-        this.Tournaments.add(t1);
-        this.Tournaments.add(t2);
+            try{
+           for (Tournament tournament: this.Tournaments
+                   ) {
+               RemotePublisher remotePublisher = new RemotePublisher();
+               remotePublisher.registerProperty("Participants");
+               remotePublisher.registerProperty("Matches");
+               this.registry.bind(tournament.getId(),remotePublisher);
+           }
+       }catch (Exception e){
+           System.out.println(e);
+       }
     }
-
-
 
     @Override
     public List<ITournament> getTournaments() throws RemoteException {
@@ -36,12 +48,17 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
     }
 
     @Override
-    public String addTournament(Tournament t) throws RemoteException {
-    this.Tournaments.add(t);
+    public String addTournament(String tournamentName, String tournamentOwner) throws RemoteException {
 
-        System.out.println(this.Tournaments);
-    return t.getId();
+        Tournament t = new Tournament();
+        t.setTournamentName(tournamentName);
+        t.setOwnerName(tournamentOwner);
+        this.Tournaments.add(t);
+        this.tournamentRepository.createTournament(t);
+        return t.getId();
     }
+
+
 
 
 
@@ -62,6 +79,7 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
        for (Tournament t: this.Tournaments){
            if (t.getId().equals(id)){
                this.Tournaments.remove(t);
+               this.tournamentRepository.deleteTournament(t.getId());
                return true;
            }
        }

@@ -15,9 +15,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
 import java.rmi.registry.Registry;
 import java.text.SimpleDateFormat;
@@ -34,6 +39,9 @@ public class MainController {
     private ITournamentManager iTournamentManager;
 
     private ObservableList<tournamentTableItem> tournaments = FXCollections.observableArrayList();
+
+    @FXML
+    private TextField ownerTb;
 
     @FXML
     private TableColumn<tournamentTableItem, String> idColumn;
@@ -65,7 +73,6 @@ public class MainController {
     @FXML
     private TextField tournamentNameTb;
 
-
     @FXML
     private GridPane mainGrid;
 
@@ -75,17 +82,45 @@ public class MainController {
     @FXML
     private Label selectedTournamentIdLb;
 
+    @FXML
+    private Pane deletePane;
+
+    @FXML
+    private ListView<?> participantsListView;
+
+    @FXML
+    private TextField participantName;
+
     private tournamentTableItem selectedItem;
 
 
     @FXML
+    void openBtnClicked(ActionEvent event) {
+        try{
+            String id = this.selectedItem.idProperty().getValue()+"";
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/pages/TournamentDetails.fxml"));
+            Parent root = (Parent) fxmlLoader.load();
+            TournamentDetailsController controller = (TournamentDetailsController) fxmlLoader.getController();
+            controller.initTournamentKey(id);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Lobby");
+            stage.show();
+
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
+    }
+
+
+    @FXML
     void deleteBtnClicked(ActionEvent event) {
-        System.out.println(this.selectedItem);
        try{
 
            String id = this.selectedItem.idProperty().getValue()+"";
            this.selectedItem = null;
-
+           this.deletePane.setVisible(false);
         this.iTournamentManager.deleteTournament(id);
         this.fillTournamentObservable();
        }catch (Exception e){
@@ -97,10 +132,9 @@ public class MainController {
     @FXML
     void createBtnClicked(ActionEvent event) {
         try{
-            Tournament newTournament = new Tournament();
-            newTournament.setTournamentName(this.tournamentNameTb.getText());
-            this.iTournamentManager.addTournament(newTournament);
+            this.iTournamentManager.addTournament(this.tournamentNameTb.getText(), this.ownerTb.getText());
             this.fillTournamentObservable();
+            this.clearCreatePane();
         }catch (Exception e){
             System.out.println(e);
         }
@@ -127,13 +161,25 @@ public class MainController {
         this.stateColumn.setCellValueFactory(data -> data.getValue().gamestatusProperty());
         this.ownerColumn.setCellValueFactory(data -> data.getValue().ownernameProperty());
 
+        this.deletePane.setVisible(false);
+
+
+
         this.tournamentsTableView.setItems(this.tournaments);
         this.tournamentsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection)  -> {
            this.selectedTournamentIdLb.setText(newSelection.id.getValue());
             this.selectedTournamentNameLb.setText(newSelection.name.getValue());
             this.selectedItem = newSelection;
 
+            this.deletePane.setVisible(true);
+
+
         });
+    }
+
+    private void clearCreatePane(){
+        this.ownerTb.setText("");
+        this.tournamentNameTb.setText("");
     }
 
     private void fillTournamentObservable() {

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ITournamentManager extends Remote {
     List<ITournament> getTournaments() throws RemoteException;
-    String addTournament(Tournament t) throws RemoteException;
+    String addTournament(String tournamentName, String tournamentOwner) throws RemoteException;
     ITournament getTournament(String id) throws RemoteException;
     boolean deleteTournament(String id) throws RemoteException;
 }
