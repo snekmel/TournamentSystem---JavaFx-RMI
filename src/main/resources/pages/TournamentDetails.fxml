@@ -56,6 +56,16 @@
                               <Font size="25.0" />
                            </font>
                         </Label>
+                        <Label layoutX="228.0" layoutY="10.0" text="Round:" textFill="WHITE">
+                           <font>
+                              <Font size="25.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="roundLbl" layoutX="317.0" layoutY="12.0" text="0" textFill="WHITE">
+                           <font>
+                              <Font size="25.0" />
+                           </font>
+                        </Label>
                      </children>
                   </Pane>
                   <TableView fx:id="matchesTableView" layoutX="9.0" layoutY="65.0" prefHeight="178.0" prefWidth="354.0">
@@ -67,6 +77,7 @@
                     </columns>
                   </TableView>
                   <Button layoutX="113.0" layoutY="250.0" mnemonicParsing="false" onAction="#selectMatchClicked" prefHeight="36.0" prefWidth="119.0" styleClass="btn" stylesheets="@../style/style.css" text="&gt;&gt;" />
+                  <Button fx:id="nextRoundBtn" layoutX="248.0" layoutY="250.0" mnemonicParsing="false" onAction="#nextRoundBtnClicked" prefHeight="36.0" prefWidth="106.0" styleClass="btn" text="Next round" />
                </children>
             </Pane>
             <Pane prefHeight="656.0" prefWidth="725.0" styleClass="contentBox" stylesheets="@../style/style.css" GridPane.columnIndex="3" GridPane.rowIndex="2">

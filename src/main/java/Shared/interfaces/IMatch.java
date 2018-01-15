@@ -23,4 +23,5 @@ public interface IMatch extends Remote {
     Participant getWinner() throws RemoteException;
     void pause() throws RemoteException;
     int getSeconds() throws RemoteException;
+    void resume() throws RemoteException;
 }

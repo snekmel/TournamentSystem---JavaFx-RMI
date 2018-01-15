@@ -165,4 +165,19 @@ public class Match extends UnicastRemoteObject implements IMatch{
     public int getSeconds() throws RemoteException {
         return this.seconds;
     }
+
+    @Override
+    public void resume() throws RemoteException {
+        this.timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                seconds++;
+                pushTimeToClients();
+            }
+        }, 0,1000);
+
+        this.matchStatus = Status.Active;
+        this.pushToClients();
+    }
 }

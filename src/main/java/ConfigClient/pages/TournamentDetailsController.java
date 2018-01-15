@@ -119,6 +119,11 @@ public class TournamentDetailsController {
 
     @FXML
     private Label matchStatusLbl;
+    @FXML
+    private Label roundLbl;
+
+    @FXML
+    private Button nextRoundBtn;
 
     private String tournamentKey;
     private ITournamentManager iTournamentManager;
@@ -165,6 +170,9 @@ public class TournamentDetailsController {
 
     @FXML
     public void initialize() {
+
+        this.nextRoundBtn.setVisible(false);
+
         //Tablie view collumns
         this.idColumn.setCellValueFactory(data -> data.getValue().idProperty());
         this.player1Column.setCellValueFactory(data -> data.getValue().name1Property());
@@ -177,6 +185,10 @@ public class TournamentDetailsController {
 
     }
 
+    @FXML
+    void nextRoundBtnClicked(ActionEvent event) {
+        System.out.println("nextROundBtn");
+    }
 
     @FXML
     void endMatchClicked(ActionEvent event) {
@@ -193,7 +205,13 @@ public class TournamentDetailsController {
     void pauseMatchClicked(ActionEvent event) {
         try{
             IMatch iMatch = this.iTournament.getMatch(this.selectedMatchKey);
-            iMatch.pause();
+            if (iMatch.getStatus() == Status.Paused){
+                iMatch.resume();
+                this.pauseBtn.setText("Pause");
+            }else if(iMatch.getStatus() == Status.Active){
+                iMatch.pause();
+                this.pauseBtn.setText("Start");
+            }
         }catch (Exception e){
             Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -358,8 +376,6 @@ public class TournamentDetailsController {
         this.participantsAddBtn.setVisible(bool);
         this.removeParticipantBtn.setVisible(bool);
         this.participantNameLbl.setVisible(bool);
-
-
     }
 
     public  void updateParticipantsList(List<Participant> participantList){
@@ -379,9 +395,6 @@ public class TournamentDetailsController {
                        ) {
                    matchTableItem matchTableItem = new matchTableItem(iMatch.getId(), iMatch.getParticipant1().getName(),iMatch.getParticipant2().getName(),iMatch.getStatus());
                    this.matches.add(matchTableItem);
-                   if(matchTableItem.statusProperty().getValue() != Status.Finished){
-
-                   }
                }
            }catch (Exception e){
                Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
@@ -400,11 +413,10 @@ public class TournamentDetailsController {
                 allMatchesFinished = false;
             }
         }
-
         if(allMatchesFinished){
-            //Show btn
+           this.nextRoundBtn.setVisible(true);
         }else{
-            //hide
+         this.nextRoundBtn.setVisible(false);
         }
     }
 
@@ -421,11 +433,8 @@ public class TournamentDetailsController {
             String timeString =   LocalTime.MIN.plusSeconds(seconds).toString();
             this.timerLbl.setText(timeString);
 
-
             this.matchLbl.setText(iMatch.getParticipant1().getName() + " V.S. " + iMatch.getParticipant2().getName());
             this.matchStatusLbl.setText(iMatch.getStatus().toString());
-
-
 
             if (iMatch.getStatus() == Status.Active){
                 this.pauseBtn.setVisible(true);
@@ -441,6 +450,11 @@ public class TournamentDetailsController {
                 this.pauseBtn.setVisible(false);
                 this.winnerDropdown.setVisible(false);
                 this.endMatchBtn.setVisible(false);
+                this.startBtn.setVisible(false);
+            }else if(iMatch.getStatus() == Status.Paused) {
+                this.pauseBtn.setVisible(true);
+                this.winnerDropdown.setVisible(true);
+                this.endMatchBtn.setVisible(true);
                 this.startBtn.setVisible(false);
             }
 
@@ -477,7 +491,6 @@ public class TournamentDetailsController {
         if (id.equals(this.selectedMatchKey)){
             int seconds = Integer.parseInt(matchTimeSplit[1]);
             String timeString =   LocalTime.MIN.plusSeconds(seconds).toString();
-            System.out.println(timeString);
             Platform.runLater(() ->{
                 this.timerLbl.setText(timeString);
             });
