@@ -63,6 +63,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
 
     public void setGameStatus(Status gameStatus) {
         this.gameStatus = gameStatus;
+        this.pushStatusToClients();
     }
 
     public void setTournamentName(String tournamentName) {
@@ -131,13 +132,17 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
     }
 
     public void startTournament() throws RemoteException {
-        this.winners = this.participants;
-        this.generateMatches();
         this.gameStatus = Status.Active;
+        this.winners = new ArrayList<>();
+        this.generateMatches();
+        this.roundCount++;
+        this.pushRoundCountToClients();
+
     }
 
     public void finishTournament() throws RemoteException {
         this.gameStatus = Status.Finished;
+        this.pushStatusToClients();
     }
 
     public String getId() throws RemoteException {
@@ -160,20 +165,111 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
         return this.ownerName;
     }
 
+    @Override
+    public void nextRound() throws RemoteException {
+        //Update winnerslijst
+        this.winners.clear();
+        for (Match match : this.matches) {
+            this.winners.add(match.getWinner());
+        }
+
+        //Maak nieuwe ronden aan
+        Round round = new Round(this.rounds.size(),this.matches);
+        this.rounds.add(round);
+        this.roundCount++;
+
+        //Maak nieuwe matches aan
+        this.matches.clear();
+
+        if (this.winners.size() == 1){
+            this.finishTournament();
+        }else{
+                    try{
+                        int matchCount = this.winners.size()/2;
+                        int winnerIndex = 0;
+                        if ((this.winners.size() % 2) ==1){
+                            matchCount++;
+                        }
+
+                        for (int i = 0; i <matchCount ; i++) {
+                            if (this.winners.get(winnerIndex) !=null && this.winners.get(winnerIndex+1)!=null){
+                                //Match met 2 personen
+                                this.matches.add(new Match(this.winners.get(winnerIndex),this.winners.get(winnerIndex+1),this.id));
+
+                            }else if(this.winners.get(winnerIndex)!=null){
+                                //Match met 1 persoon
+                                this.matches.add(new Match(this.winners.get(winnerIndex),this.id));
+                            }
+                            winnerIndex++;
+                            winnerIndex++;
+
+                        }
+
+                    }catch (Exception e){
+                        Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
+                    }
+
+        }
+        this.pushMatchesToClients();
+        this.pushRoundCountToClients();
+    }
+
+    @Override
+    public int getRoundCount() throws RemoteException {
+        return this.roundCount;
+    }
+
+    private void pushRoundCountToClients(){
+        try{
+            Registry registry = RegistryRepository.getRmiRegistry();
+            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
+            publisherForDomain.inform("RoundCount",null,this.roundCount);
+        }catch (Exception e){
+            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+
+    private void pushStatusToClients(){
+        try{
+            Registry registry = RegistryRepository.getRmiRegistry();
+            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
+            publisherForDomain.inform("Status",null,this.gameStatus);
+            System.out.println("Pushed matches");
+        }catch (Exception e){
+            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    private void pushMatchesToClients(){
+        try{
+            Registry registry = RegistryRepository.getRmiRegistry();
+            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
+            publisherForDomain.inform("Matches",null,this.matches);
+        }catch (Exception e){
+            Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
     private void generateMatches(){
         int participantsIndex = 0;
         int matchCount = this.participants.size() / 2;
+        boolean unEven = false;
         if ((this.participants.size() % 2) ==1){
             matchCount++;
+
         }
+
+        System.out.println(matchCount);
         try{
-            for (int i = 0; i <= (matchCount - 1) ; i++) {
+            for (int i = 0; i <= (matchCount) ; i++) {
                 if (this.participants.get(participantsIndex) != null && this.participants.get(participantsIndex + 1) !=null){
                     Match match = new Match(this.participants.get(participantsIndex),this.participants.get(participantsIndex + 1), this.id);
                     this.matches.add(match);
+
                 }
-                else if( this.participants.get(participantsIndex + 1) !=null){
-                    System.out.println("1 left");
+                else if( this.participants.get(this.participants.size()) !=null){
+                    Match match = new Match(this.participants.get(participantsIndex - 1),this.id);
+                    this.matches.add(match);
                 }
             participantsIndex++;
             participantsIndex++;
@@ -183,13 +279,8 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
              Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
         }
 
-        try{
-            Registry registry = RegistryRepository.getRmiRegistry();
-            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
-            publisherForDomain.inform("Matches",null,this.matches);
-        }catch (Exception e){
-             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
-        }
+      this.pushMatchesToClients();
+
 
     }
 

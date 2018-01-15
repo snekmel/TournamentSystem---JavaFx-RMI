@@ -157,9 +157,11 @@ public class TournamentDetailsController {
             this.statusLbl.setText(this.iTournament.getGameStatus().toString());
             this.participants.addAll(this.iTournament.getParticipants());
             this.updateMatchesList(this.iTournament.getMatches());
+            this.statusLbl.setText(this.iTournament.getGameStatus().toString());
 
             if (this.iTournament.getGameStatus() == Status.Active){
                 this.tournamentStartPane.setVisible(false);
+
                 this.enableParticipantsCrud(false);
             }
         }catch (Exception e){
@@ -187,7 +189,13 @@ public class TournamentDetailsController {
 
     @FXML
     void nextRoundBtnClicked(ActionEvent event) {
-        System.out.println("nextROundBtn");
+        try{
+          this.iTournament.nextRound();
+            this.roundLbl.setText(this.iTournament.getRoundCount()+"");
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
     }
 
     @FXML
@@ -361,7 +369,11 @@ public class TournamentDetailsController {
      try{
          this.iTournament.startTournament();
          this.tournamentStartPane.setVisible(false);
+         this.statusLbl.setText(this.iTournament.getGameStatus().toString());
+
          this.enableParticipantsCrud(false);
+         this.selectedMatchKey = this.iTournament.getMatches().get(0).getId();
+         this.updateScoreBoard( this.iTournament.getMatch(this.selectedMatchKey));
      }catch (Exception e){
          Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
      }
@@ -370,6 +382,7 @@ public class TournamentDetailsController {
 
 
     //-----------------------------------------------------------------------------------------View updating methodes
+
 
     private void enableParticipantsCrud(Boolean bool){
         this.participantName.setVisible(bool);
@@ -413,15 +426,23 @@ public class TournamentDetailsController {
                 allMatchesFinished = false;
             }
         }
-        if(allMatchesFinished){
-           this.nextRoundBtn.setVisible(true);
-        }else{
-         this.nextRoundBtn.setVisible(false);
-        }
+     try{
+         if(allMatchesFinished && (this.iTournament.getGameStatus() != Status.Finished)){
+             this.nextRoundBtn.setVisible(true);
+         }else{
+             this.nextRoundBtn.setVisible(false);
+         }
+     }catch (Exception e){
+         Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+
+     }
     }
 
     public void updateScoreBoard(IMatch iMatch){
         try{
+            this.statusLbl.setText(this.iTournament.getGameStatus().toString());
+            this.roundLbl.setText(this.iTournament.getRoundCount()+"");
+            this.showOrDisableRoundBtn();
             this.playerName1Tb.setText(iMatch.getParticipant1().getName());
             this.playerName2Tb.setText(iMatch.getParticipant2().getName());
             this.playerPoints1Lbl.setText(iMatch.getPointsParticipant1()+"");
@@ -438,6 +459,7 @@ public class TournamentDetailsController {
 
             if (iMatch.getStatus() == Status.Active){
                 this.pauseBtn.setVisible(true);
+                this.pauseBtn.setText("Pause");
                 this.winnerDropdown.setVisible(true);
                 this.endMatchBtn.setVisible(true);
                 this.startBtn.setVisible(false);
@@ -453,6 +475,7 @@ public class TournamentDetailsController {
                 this.startBtn.setVisible(false);
             }else if(iMatch.getStatus() == Status.Paused) {
                 this.pauseBtn.setVisible(true);
+                this.pauseBtn.setText("Start");
                 this.winnerDropdown.setVisible(true);
                 this.endMatchBtn.setVisible(true);
                 this.startBtn.setVisible(false);
@@ -462,6 +485,8 @@ public class TournamentDetailsController {
             Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
+
+
 
     public void updateMatch(IMatch iMatch) {
         matchTableItem newItem;
@@ -495,6 +520,19 @@ public class TournamentDetailsController {
                 this.timerLbl.setText(timeString);
             });
         }
+    }
+
+    public void updateTournamentStatus(Status newValue) {
+        Platform.runLater(()->{
+            this.statusLbl.setText(newValue.toString());
+        });
+    }
+
+    public void updateRoundCount(int newValue) {
+        Platform.runLater(()->{
+            this.roundLbl.setText(newValue+"");
+        });
+
     }
 
     public class matchTableItem{

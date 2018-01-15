@@ -2,6 +2,7 @@ package ConfigClient.models;
 
 import ConfigClient.pages.TournamentDetailsController;
 import Server.repositorys.RegistryRepository;
+import Shared.enums.Status;
 import Shared.interfaces.IMatch;
 import Shared.models.Participant;
 import publisher.IRemotePropertyListener;
@@ -29,6 +30,8 @@ public class TournamentDetailsCommunicator extends UnicastRemoteObject implement
               this.subscribe("Matches");
               this.subscribe("Match");
               this.subscribe("Match-Time");
+              this.subscribe("Status");
+              this.subscribe("RoundCount");
         }catch (Exception e){
             Logger.getLogger(TournamentDetailsCommunicator.class.getName()).log(Level.SEVERE, null, e);
 
@@ -50,6 +53,12 @@ public class TournamentDetailsCommunicator extends UnicastRemoteObject implement
                break;
            case "Match-Time":
                this.tournamentDetailsController.updateMatchTimer((String)evt.getNewValue());
+               break;
+           case "Status":
+               this.tournamentDetailsController.updateTournamentStatus((Status)evt.getNewValue());
+               break;
+           case "RoundCount":
+               this.tournamentDetailsController.updateRoundCount((int)evt.getNewValue());
                break;
            default:
                break;

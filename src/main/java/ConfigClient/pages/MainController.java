@@ -18,6 +18,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
+import java.awt.event.MouseEvent;
 import java.rmi.registry.Registry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -161,6 +163,21 @@ public class MainController {
             this.deletePane.setVisible(true);
 
 
+        });
+
+        this.logoutBtn.setOnAction(data->{
+            try{
+                Stage activeStage = (Stage) logoutBtn.getScene().getWindow();
+                activeStage.close();
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/pages/LoginPage.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Login");
+                stage.show();
+            }catch (Exception e){
+                Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, e);
+            }
         });
     }
 

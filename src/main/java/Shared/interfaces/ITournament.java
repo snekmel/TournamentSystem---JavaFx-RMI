@@ -17,11 +17,12 @@ public interface ITournament extends Remote {
     IMatch getMatch(String id) throws RemoteException;
     void startTournament() throws RemoteException;
     void finishTournament() throws RemoteException;
-
     String getId() throws RemoteException;
     Status getGameStatus() throws RemoteException;
     Date getStartDate() throws RemoteException;
     String getName() throws RemoteException;
     String getOwnername() throws RemoteException;
+    void nextRound() throws RemoteException;
+    int getRoundCount() throws RemoteException;
 
 }

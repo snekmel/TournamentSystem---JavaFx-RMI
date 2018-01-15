@@ -50,18 +50,18 @@ public class RegisterController {
 
     @FXML
     void goToLoginBtnClicked(ActionEvent event) {
-        try{
-            Stage activeStage = (Stage) goToLoginBtn.getScene().getWindow();
-            activeStage.close();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("pages/LoginPage.fxml"));
-            Parent root = (Parent) fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Login");
-            stage.show();
-        }catch (Exception e){
-            Logger.getLogger(RegisterController.class.getName()).log(Level.SEVERE, null, e);
-        }
+            try{
+                Stage activeStage = (Stage) usernameTb.getScene().getWindow();
+                activeStage.close();
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/pages/LoginPage.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Login");
+                stage.show();
+            }catch (Exception e){
+                Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, e);
+            }
     }
 
     @FXML

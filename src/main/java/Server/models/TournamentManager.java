@@ -29,6 +29,8 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
                remotePublisher.registerProperty("Matches");
                remotePublisher.registerProperty("Match");
                remotePublisher.registerProperty("Match-Time");
+               remotePublisher.registerProperty("Status");
+               remotePublisher.registerProperty("RoundCount");
                this.registry.bind(tournament.getId(),remotePublisher);
            }
        }catch (Exception e){
@@ -61,6 +63,8 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
                 remotePublisher.registerProperty("Matches");
                 remotePublisher.registerProperty("Match");
                 remotePublisher.registerProperty("Match-Time");
+                remotePublisher.registerProperty("Status");
+            remotePublisher.registerProperty("RoundCount");
                 this.registry.bind(t.getId(),remotePublisher);
 
         }catch (Exception e){

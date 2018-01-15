@@ -6,6 +6,7 @@ import Shared.interfaces.IMatch;
 import Shared.models.Participant;
 import publisher.IRemotePublisherForDomain;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -33,6 +34,14 @@ public class Match extends UnicastRemoteObject implements IMatch{
         this.tournamentKey = id;
     }
 
+    public Match(Participant participant1, String id)throws RemoteException{
+        this.id = java.util.UUID.randomUUID().toString();
+        this.participant1 = participant1;
+        this.participant2 = new Participant("");
+        this.winner = participant1;
+        this.matchStatus = Status.Finished;
+        this.tournamentKey = id;
+    }
 
     @Override
     public void start() throws RemoteException {
@@ -161,6 +170,8 @@ public class Match extends UnicastRemoteObject implements IMatch{
         this.pushToClients();
     }
 
+
+
     @Override
     public int getSeconds() throws RemoteException {
         return this.seconds;
@@ -179,5 +190,11 @@ public class Match extends UnicastRemoteObject implements IMatch{
 
         this.matchStatus = Status.Active;
         this.pushToClients();
+    }
+
+
+    @Override
+    public String toString() {
+        return this.participant1.getName() + "V.S." + this.participant2.getName() + "| Winner: " + this.winner.getName();
     }
 }

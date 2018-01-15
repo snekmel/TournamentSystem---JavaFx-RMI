@@ -8,18 +8,26 @@ import java.util.List;
 public class Round implements Serializable {
 
     private int id;
-    private List<IMatch> results;
+    private List<Match> results;
 
     public int getId() {
         return id;
     }
 
-    public List<IMatch> getResults() {
+    public List<Match> getResults() {
         return results;
     }
 
-    public Round(int id, List<IMatch> results) {
+    public Round(int id, List<Match> results) {
         this.id = id;
         this.results = results;
+    }
+
+    @Override
+    public String toString() {
+        return "Round{" +
+                "id=" + id +
+                ", results=" + results +
+                '}';
     }
 }
