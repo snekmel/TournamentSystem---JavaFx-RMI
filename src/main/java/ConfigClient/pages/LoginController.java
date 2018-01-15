@@ -1,7 +1,5 @@
 package ConfigClient.pages;
-import Server.repositorys.AuthRepository;
 import Server.repositorys.RegistryRepository;
-import Server.repositorys.context.AuthRepositorySQL;
 import Shared.interfaces.IAuthManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -60,11 +58,8 @@ public class LoginController {
                     this.openDashboard();
                 }
             }
-            else{
-                System.out.println("Failed");
-            }
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, e);
         }
 
 
@@ -87,7 +82,7 @@ public class LoginController {
             stage.setTitle("Dashboard");
             stage.show();
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -102,7 +97,7 @@ public class LoginController {
             stage.setTitle("Register");
             stage.show();
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 

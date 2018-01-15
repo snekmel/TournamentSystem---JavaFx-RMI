@@ -1,11 +1,16 @@
 package Server.models;
 
+import Server.repositorys.RegistryRepository;
 import Shared.enums.Status;
 import Shared.interfaces.IMatch;
 import Shared.models.Participant;
+import publisher.IRemotePublisherForDomain;
 
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Match extends UnicastRemoteObject implements IMatch{
     private String id;
@@ -15,47 +20,79 @@ public class Match extends UnicastRemoteObject implements IMatch{
     private int participant1Points = 0;
     private int participant2Points = 0;
     private Participant winner;
+    private Timer timer = new Timer();
+    private int seconds = 0;
+    private String tournamentKey;
 
-    public Match(Participant participant1, Participant participant2) throws RemoteException{
+
+    public Match(Participant participant1, Participant participant2, String id) throws RemoteException{
         this.id = java.util.UUID.randomUUID().toString();
         this.participant1 = participant1;
         this.participant2 = participant2;
+        this.matchStatus = Status.NotStarted;
+        this.tournamentKey = id;
     }
 
 
     @Override
     public void start() throws RemoteException {
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                seconds++;
+                pushTimeToClients();
+            }
+        }, 0,1000);
 
+        this.matchStatus = Status.Active;
+        this.pushToClients();
     }
 
     @Override
     public int addPointsParticipant1(int points) throws RemoteException {
-        return 0;
+       this.participant1Points = this.participant1Points + points;
+        this.pushToClients();
+        return this.participant1Points;
     }
 
     @Override
     public int addPointsParticipant2(int points) throws RemoteException {
-        return 0;
+       this.participant2Points = this.participant2Points + points;
+        this.pushToClients();
+        return this.participant2Points;
     }
 
     @Override
     public int removePointsParticipant1(int points) throws RemoteException {
-        return 0;
+        this.participant1Points = this.participant1Points - points;
+        this.pushToClients();
+        return this.participant1Points;
     }
 
     @Override
     public int removePointsParticipant2(int points) throws RemoteException {
-        return 0;
+        this.participant2Points = this.participant2Points - points;
+        this.pushToClients();
+        return this.participant2Points;
     }
 
     @Override
     public void endMatch() throws RemoteException {
-
+        if (this.participant2Points > this.participant1Points){
+            this.winner = this.participant2;
+        }else{
+            this.winner = this.participant1;
+        }
+        this.matchStatus = Status.Finished;
+        this.pushToClients();
     }
 
     @Override
     public void endMatch(Participant winner) throws RemoteException {
-
+        this.winner = winner;
+        this.matchStatus = Status.Finished;
+        this.timer.cancel();
+        this.pushToClients();
     }
 
     @Override
@@ -95,5 +132,37 @@ public class Match extends UnicastRemoteObject implements IMatch{
        }else{
            return null;
        }
+    }
+
+    private void pushToClients(){
+        try{
+            Registry registry = RegistryRepository.getRmiRegistry();
+            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.tournamentKey);
+            publisherForDomain.inform("Match",null,this);
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
+    private void pushTimeToClients(){
+        try{
+            Registry registry = RegistryRepository.getRmiRegistry();
+            IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.tournamentKey);
+            publisherForDomain.inform("Match-Time",null,(this.id+"|"+this.seconds));
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
+    @Override
+    public void pause() throws RemoteException {
+        this.timer.cancel();
+        this.matchStatus = Status.Paused;
+        this.pushToClients();
+    }
+
+    @Override
+    public int getSeconds() throws RemoteException {
+        return this.seconds;
     }
 }

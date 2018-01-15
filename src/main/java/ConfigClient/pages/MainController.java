@@ -1,14 +1,10 @@
 package ConfigClient.pages;
 
-import Server.models.Match;
-import Server.models.Tournament;
+
 import Server.repositorys.RegistryRepository;
-import Server.repositorys.TournamentRepository;
 import Shared.enums.Status;
-import Shared.interfaces.IAuthManager;
 import Shared.interfaces.ITournament;
 import Shared.interfaces.ITournamentManager;
-import Shared.models.Participant;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -19,16 +15,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-
 import java.rmi.registry.Registry;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,7 +98,7 @@ public class MainController {
             stage.show();
 
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, e);
         }
 
     }
@@ -124,8 +114,7 @@ public class MainController {
         this.iTournamentManager.deleteTournament(id);
         this.fillTournamentObservable();
        }catch (Exception e){
-           System.out.println(e);
-       }
+           Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, e);       }
 
     }
 
@@ -136,8 +125,7 @@ public class MainController {
             this.fillTournamentObservable();
             this.clearCreatePane();
         }catch (Exception e){
-            System.out.println(e);
-        }
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, e);        }
     }
 
 
@@ -147,8 +135,7 @@ public class MainController {
             this.iTournamentManager = (ITournamentManager) this.registry.lookup("TournamentManager");
             this.fillTournamentObservable();
         }catch (Exception e){
-            System.out.println(e);
-        }
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, e);        }
 
 
     }
@@ -200,7 +187,7 @@ public class MainController {
     public class tournamentTableItem{
 
         private final SimpleStringProperty id = new SimpleStringProperty();
-        private final SimpleObjectProperty<Status> gamestatus = new SimpleObjectProperty<Status>();
+        private final SimpleObjectProperty<Status> gamestatus = new SimpleObjectProperty<>();
         private final SimpleStringProperty name = new SimpleStringProperty();
         private final SimpleStringProperty ownername = new SimpleStringProperty();
 

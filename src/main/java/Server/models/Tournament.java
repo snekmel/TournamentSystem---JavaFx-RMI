@@ -17,6 +17,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Tournament extends UnicastRemoteObject implements ITournament,Serializable {
 
@@ -28,6 +30,8 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
     private List<Participant> participants;
     private List<Match> matches;
     private List<Participant> winners;
+    private List<Round> rounds;
+    private int roundCount;
 
     public Tournament() throws RemoteException {
         this.id = java.util.UUID.randomUUID().toString();
@@ -36,6 +40,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
         this.matches = new ArrayList<Match>();
         this.tournamentName = this.id;
         this.gameStatus = Status.NotStarted;
+        this.rounds = new ArrayList<>();
 
     }
 
@@ -46,7 +51,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
         this.startDate = startDate;
         this.tournamentName = tournamentName;
         this.ownerName = ownerName;
-
+        this.rounds = new ArrayList<>();
     }
 
 
@@ -75,7 +80,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
             tournamentRepository.updateTournament(this);
 
         }catch (Exception e){
-            System.out.println(e);
+             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
         }
 
     }
@@ -96,7 +101,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
                     this.updateTournamentDb();
 
                 }catch (Exception e){
-                    System.out.println(e);
+                     Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
                 }
             }
         }
@@ -117,7 +122,9 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
       IMatch returnMatch = null;
         for (Match match: this.matches
              ) {
-            returnMatch = (IMatch) match;
+            if (match.getId().equals(id)) {
+                returnMatch = (IMatch) match;
+            }
         }
       return returnMatch;
 
@@ -162,7 +169,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
         try{
             for (int i = 0; i <= (matchCount - 1) ; i++) {
                 if (this.participants.get(participantsIndex) != null && this.participants.get(participantsIndex + 1) !=null){
-                    Match match = new Match(this.participants.get(participantsIndex),this.participants.get(participantsIndex + 1));
+                    Match match = new Match(this.participants.get(participantsIndex),this.participants.get(participantsIndex + 1), this.id);
                     this.matches.add(match);
                 }
                 else if( this.participants.get(participantsIndex + 1) !=null){
@@ -173,7 +180,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
             }
 
         }catch (Exception e){
-            System.out.println(e);
+             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
         }
 
         try{
@@ -181,7 +188,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
             IRemotePublisherForDomain publisherForDomain = (IRemotePublisherForDomain) registry.lookup(this.id);
             publisherForDomain.inform("Matches",null,this.matches);
         }catch (Exception e){
-            System.out.println(e);
+             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
         }
 
     }
@@ -191,7 +198,7 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
             TournamentRepository tournamentRepository = new TournamentRepository(new TournamentRepositorySQL());
             tournamentRepository.updateTournament(this);
         }catch (Exception e){
-            System.out.println(e);
+             Logger.getLogger(Tournament.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 

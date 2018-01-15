@@ -53,10 +53,8 @@ public class RegisterController {
         try{
             Stage activeStage = (Stage) goToLoginBtn.getScene().getWindow();
             activeStage.close();
-
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("pages/LoginPage.fxml"));
             Parent root = (Parent) fxmlLoader.load();
-            System.out.println("2");
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Login");

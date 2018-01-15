@@ -5,9 +5,7 @@ import Server.repositorys.TournamentRepository;
 import Server.repositorys.context.TournamentRepositorySQL;
 import Shared.interfaces.ITournament;
 import Shared.interfaces.ITournamentManager;
-import publisher.IRemotePublisherForDomain;
 import publisher.RemotePublisher;
-
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -29,6 +27,8 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
                RemotePublisher remotePublisher = new RemotePublisher();
                remotePublisher.registerProperty("Participants");
                remotePublisher.registerProperty("Matches");
+               remotePublisher.registerProperty("Match");
+               remotePublisher.registerProperty("Match-Time");
                this.registry.bind(tournament.getId(),remotePublisher);
            }
        }catch (Exception e){
@@ -55,6 +55,18 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
         t.setOwnerName(tournamentOwner);
         this.Tournaments.add(t);
         this.tournamentRepository.createTournament(t);
+        try{
+                RemotePublisher remotePublisher = new RemotePublisher();
+                remotePublisher.registerProperty("Participants");
+                remotePublisher.registerProperty("Matches");
+                remotePublisher.registerProperty("Match");
+                remotePublisher.registerProperty("Match-Time");
+                this.registry.bind(t.getId(),remotePublisher);
+
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
         return t.getId();
     }
 
@@ -85,8 +97,7 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
        }
       }catch (Exception e){
           System.out.println(e);
-      }finally {
-          return false;
       }
+          return false;
     }
 }

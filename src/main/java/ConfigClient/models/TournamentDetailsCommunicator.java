@@ -6,9 +6,7 @@ import Shared.interfaces.IMatch;
 import Shared.models.Participant;
 import publisher.IRemotePropertyListener;
 import publisher.IRemotePublisherForListener;
-
 import java.beans.PropertyChangeEvent;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -21,7 +19,7 @@ public class TournamentDetailsCommunicator extends UnicastRemoteObject implement
 
     private TournamentDetailsController tournamentDetailsController;
     private IRemotePublisherForListener publisher;
-    private Registry registry = RegistryRepository.getRmiRegistry();
+    private transient Registry registry = RegistryRepository.getRmiRegistry();
 
     public TournamentDetailsCommunicator(TournamentDetailsController tournamentDetailsController) throws RemoteException {
         this.tournamentDetailsController = tournamentDetailsController;
@@ -29,6 +27,8 @@ public class TournamentDetailsCommunicator extends UnicastRemoteObject implement
              this.publisher = (IRemotePublisherForListener)this.registry.lookup(tournamentDetailsController.getTournamentKey());
               this.subscribe("Participants");
               this.subscribe("Matches");
+              this.subscribe("Match");
+              this.subscribe("Match-Time");
         }catch (Exception e){
             Logger.getLogger(TournamentDetailsCommunicator.class.getName()).log(Level.SEVERE, null, e);
 
@@ -42,20 +42,27 @@ public class TournamentDetailsCommunicator extends UnicastRemoteObject implement
            case "Participants":
                this.tournamentDetailsController.updateParticipantsList((List<Participant>) evt.getNewValue());
                break;
-
            case "Matches":
                 this.tournamentDetailsController.updateMatchesList((List<IMatch>) evt.getNewValue());
+               break;
+           case "Match":
+               this.tournamentDetailsController.updateMatch((IMatch) evt.getNewValue());
+               break;
+           case "Match-Time":
+               this.tournamentDetailsController.updateMatchTimer((String)evt.getNewValue());
+               break;
+           default:
                break;
         }
     }
 
     public void subscribe(String property) {
-
-        System.out.println();
         try {
             publisher.subscribeRemoteListener(this, property);
         } catch (RemoteException ex) {
             Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+
 }

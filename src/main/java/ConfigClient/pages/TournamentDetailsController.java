@@ -15,9 +15,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
+import javafx.scene.layout.Pane;
 import java.rmi.registry.Registry;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TournamentDetailsController {
 
@@ -76,7 +79,7 @@ public class TournamentDetailsController {
     private Label timerLbl;
 
     @FXML
-    private ComboBox<?> winnerDropdown;
+    private ComboBox<Participant> winnerDropdown;
 
     @FXML
     private Button endMatchBtn;
@@ -99,6 +102,23 @@ public class TournamentDetailsController {
     @FXML
     private TextField participantName;
 
+    @FXML
+    private Button participantsAddBtn;
+
+    @FXML
+    private Button removeParticipantBtn;
+
+    @FXML
+    private Label participantNameLbl;
+
+    @FXML
+    private Pane tournamentStartPane;
+
+    @FXML
+    private Label matchLbl;
+
+    @FXML
+    private Label matchStatusLbl;
 
     private String tournamentKey;
     private ITournamentManager iTournamentManager;
@@ -107,8 +127,20 @@ public class TournamentDetailsController {
     private ObservableList<matchTableItem> matches = FXCollections.observableArrayList();
     private ObservableList<Participant> participants  = FXCollections.observableArrayList();
     private Registry registry = RegistryRepository.getRmiRegistry();
+    private String selectedMatchKey;
 
 
+    public String getTournamentKey() {
+        return tournamentKey;
+    }
+
+    public ITournamentManager getiTournamentManager() {
+        return iTournamentManager;
+    }
+
+    public TournamentDetailsCommunicator getTournamentDetailsCommunicator() {
+        return tournamentDetailsCommunicator;
+    }
 
     public void initTournamentKey(String id) {
         this.tournamentKey = id;
@@ -119,11 +151,15 @@ public class TournamentDetailsController {
             this.tournamentNameLbl.setText(this.iTournament.getName());
             this.statusLbl.setText(this.iTournament.getGameStatus().toString());
             this.participants.addAll(this.iTournament.getParticipants());
+            this.updateMatchesList(this.iTournament.getMatches());
+
+            if (this.iTournament.getGameStatus() == Status.Active){
+                this.tournamentStartPane.setVisible(false);
+                this.enableParticipantsCrud(false);
+            }
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
         }
-
-
     }
 
 
@@ -141,6 +177,41 @@ public class TournamentDetailsController {
 
     }
 
+
+    @FXML
+    void endMatchClicked(ActionEvent event) {
+        try{
+            Participant winner = this.winnerDropdown.getSelectionModel().getSelectedItem();
+            IMatch iMatch = this.iTournament.getMatch(this.selectedMatchKey);
+            iMatch.endMatch(winner);
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    @FXML
+    void pauseMatchClicked(ActionEvent event) {
+        try{
+            IMatch iMatch = this.iTournament.getMatch(this.selectedMatchKey);
+            iMatch.pause();
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+
+    @FXML
+    void startMatchClicked(ActionEvent event) {
+        try{
+            IMatch iMatch = this.iTournament.getMatch(this.selectedMatchKey);
+            iMatch.start();
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+
+    }
+
     @FXML
     void addParticipantBtnClicked(ActionEvent event) {
         Participant participant = new Participant( this.participantName.getText());
@@ -148,7 +219,7 @@ public class TournamentDetailsController {
         try{
             this.iTournament.addParticipant(participant);
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -159,7 +230,7 @@ public class TournamentDetailsController {
          try{
              this.iTournament.removeParticipant(p.getId());
          }catch (Exception e){
-             System.out.println(e);
+             Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
          }
      }
 
@@ -167,33 +238,130 @@ public class TournamentDetailsController {
 
     @FXML
     void selectMatchClicked(ActionEvent event) {
-        System.out.println("selected");
+           matchTableItem selectedItem =  this.matchesTableView.getSelectionModel().getSelectedItem();
+            this.selectedMatchKey = selectedItem.idProperty().getValue();
+            try{
+                this.updateScoreBoard(this.iTournament.getMatch(this.selectedMatchKey));
+            }catch (Exception e){
+                Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+            }
+
+    }
+
+    @FXML
+    void Player1Min1(ActionEvent event) {
+     try {
+         IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+         iMatch.removePointsParticipant1(1);
+
+     }catch (Exception e){
+         Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+     }
+
+    }
+
+    @FXML
+    void Player1Min2(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.removePointsParticipant1(2);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    @FXML
+    void Player1Plus1(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.addPointsParticipant1(1);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    @FXML
+    void Player1Plus2(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.addPointsParticipant1(2);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    @FXML
+    void Player2Min1(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.removePointsParticipant2(1);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+
+    }
+
+    @FXML
+    void Player2Min2(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.removePointsParticipant2(2);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    @FXML
+    void Player2Plus1(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.addPointsParticipant2(1);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    @FXML
+    void Player2Plus2(ActionEvent event) {
+        try {
+            IMatch iMatch = this.iTournament.getMatch(selectedMatchKey);
+            iMatch.addPointsParticipant2(2);
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
     }
 
     @FXML
     void startTournamentBtnClicked(ActionEvent event) {
      try{
          this.iTournament.startTournament();
+         this.tournamentStartPane.setVisible(false);
+         this.enableParticipantsCrud(false);
      }catch (Exception e){
-         System.out.println(e);
+         Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
      }
     }
 
 
-    public String getTournamentKey() {
-        return tournamentKey;
-    }
-
-    public ITournamentManager getiTournamentManager() {
-        return iTournamentManager;
-    }
-
-    public TournamentDetailsCommunicator getTournamentDetailsCommunicator() {
-        return tournamentDetailsCommunicator;
-    }
-
 
     //-----------------------------------------------------------------------------------------View updating methodes
+
+    private void enableParticipantsCrud(Boolean bool){
+        this.participantName.setVisible(bool);
+        this.participantsAddBtn.setVisible(bool);
+        this.removeParticipantBtn.setVisible(bool);
+        this.participantNameLbl.setVisible(bool);
+
+
+    }
+
     public  void updateParticipantsList(List<Participant> participantList){
         Platform.runLater(() -> {
             this.participants.clear();
@@ -203,29 +371,124 @@ public class TournamentDetailsController {
 
     public void updateMatchesList(List<IMatch> matchList){
         Platform.runLater(() -> {
+
             this.matches.clear();
             this.matchesTableView.getItems().clear();
            try{
                for (IMatch iMatch: matchList
                        ) {
-                   System.out.println("Match" +iMatch.getId());
                    matchTableItem matchTableItem = new matchTableItem(iMatch.getId(), iMatch.getParticipant1().getName(),iMatch.getParticipant2().getName(),iMatch.getStatus());
                    this.matches.add(matchTableItem);
+                   if(matchTableItem.statusProperty().getValue() != Status.Finished){
+
+                   }
                }
            }catch (Exception e){
-               System.out.println(e);
+               Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
            }
+
+          this.showOrDisableRoundBtn();
         });
     }
 
-    private class matchTableItem{
 
+    private void showOrDisableRoundBtn(){
+        boolean allMatchesFinished = true;
+        for (matchTableItem item: this.matches
+             ) {
+            if(item.statusProperty().getValue() != Status.Finished ){
+                allMatchesFinished = false;
+            }
+        }
+
+        if(allMatchesFinished){
+            //Show btn
+        }else{
+            //hide
+        }
+    }
+
+    public void updateScoreBoard(IMatch iMatch){
+        try{
+            this.playerName1Tb.setText(iMatch.getParticipant1().getName());
+            this.playerName2Tb.setText(iMatch.getParticipant2().getName());
+            this.playerPoints1Lbl.setText(iMatch.getPointsParticipant1()+"");
+            this.playerPoints2Lbl.setText(iMatch.getPointsParticipant2()+"");
+            this.winnerDropdown.getItems().clear();
+            this.winnerDropdown.getItems().add(iMatch.getParticipant1());
+            this.winnerDropdown.getItems().add(iMatch.getParticipant2());
+            int seconds = iMatch.getSeconds();
+            String timeString =   LocalTime.MIN.plusSeconds(seconds).toString();
+            this.timerLbl.setText(timeString);
+
+
+            this.matchLbl.setText(iMatch.getParticipant1().getName() + " V.S. " + iMatch.getParticipant2().getName());
+            this.matchStatusLbl.setText(iMatch.getStatus().toString());
+
+
+
+            if (iMatch.getStatus() == Status.Active){
+                this.pauseBtn.setVisible(true);
+                this.winnerDropdown.setVisible(true);
+                this.endMatchBtn.setVisible(true);
+                this.startBtn.setVisible(false);
+            }else if(iMatch.getStatus() == Status.NotStarted){
+                this.pauseBtn.setVisible(false);
+                this.winnerDropdown.setVisible(false);
+                this.endMatchBtn.setVisible(false);
+                this.startBtn.setVisible(true);
+            }else if(iMatch.getStatus() == Status.Finished) {
+                this.pauseBtn.setVisible(false);
+                this.winnerDropdown.setVisible(false);
+                this.endMatchBtn.setVisible(false);
+                this.startBtn.setVisible(false);
+            }
+
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    public void updateMatch(IMatch iMatch) {
+        matchTableItem newItem;
+        try {
+            newItem = new matchTableItem(iMatch.getId(), iMatch.getParticipant1().getName(),iMatch.getParticipant2().getName(),iMatch.getStatus());
+            Platform.runLater(() -> {
+                for (int i = 0; i < this.matches.size() ; i++) {
+                    if (this.matches.get(i).idProperty().getValue().equals(newItem.idProperty().getValue())){
+                        this.matches.set(i,newItem);
+                    }
+                }
+                if (this.selectedMatchKey.equals(newItem.idProperty().getValue())){
+                    this.updateScoreBoard(iMatch);
+                }
+            });
+
+            this.showOrDisableRoundBtn();
+        }catch (Exception e){
+            Logger.getLogger(TournamentDetailsController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    public void updateMatchTimer(String matchTimeString) {
+        //Split in: key|seconds
+        String[] matchTimeSplit = matchTimeString.split("\\|");
+        String id = matchTimeSplit[0];
+        if (id.equals(this.selectedMatchKey)){
+            int seconds = Integer.parseInt(matchTimeSplit[1]);
+            String timeString =   LocalTime.MIN.plusSeconds(seconds).toString();
+            System.out.println(timeString);
+            Platform.runLater(() ->{
+                this.timerLbl.setText(timeString);
+            });
+        }
+    }
+
+    public class matchTableItem{
         private SimpleStringProperty id;
         private SimpleStringProperty name1;
         private SimpleStringProperty name2;
         private SimpleObjectProperty<Status> status;
-
-
 
         public SimpleStringProperty idProperty() {
             return id;

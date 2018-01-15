@@ -2,5 +2,5 @@ projectKey=KillerApp
 serverUrl=http://localhost:9000
 serverVersion=6.7.1.35068
 dashboardUrl=http://localhost:9000/dashboard/index/KillerApp
-ceTaskId=AWDf0HkJQ8xKRlAawiRy
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AWDf0HkJQ8xKRlAawiRy
+ceTaskId=AWDz9m86BKja1C_Uu0yE
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AWDz9m86BKja1C_Uu0yE

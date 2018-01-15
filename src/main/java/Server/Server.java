@@ -1,7 +1,6 @@
 package Server;
 
 import Server.models.AuthManager;
-import Server.models.Tournament;
 import Server.models.TournamentManager;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -14,7 +13,6 @@ import java.util.logging.Logger;
 
 public class Server extends Application {
 
-    private String hostIp = "localhost";
     private int port = 1099;
     private Registry registry;
 

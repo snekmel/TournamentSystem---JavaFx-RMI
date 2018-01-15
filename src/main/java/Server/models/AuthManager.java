@@ -1,20 +1,24 @@
 package Server.models;
 
+import MatchViewClient.models.ScoreboardCommunicator;
 import Server.repositorys.AuthRepository;
+import Server.repositorys.RegistryRepository;
 import Server.repositorys.context.AuthRepositorySQL;
-import Server.repositorys.interfaces.IAuthRepository;
 import Shared.interfaces.IAuthManager;
 import Shared.interfaces.ITournamentManager;
 
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AuthManager extends UnicastRemoteObject implements IAuthManager{
 
     private AuthRepository authRepository = new AuthRepository(new AuthRepositorySQL());
     private List<Account> accounts;
-
+    private transient Registry registry = RegistryRepository.getRmiRegistry();
 
 
     public AuthManager() throws RemoteException {
@@ -44,13 +48,17 @@ public class AuthManager extends UnicastRemoteObject implements IAuthManager{
 
 
     public ITournamentManager checkAuth(String name, String password) throws RemoteException {
-            if (this.authRepository.checkAuth(name,password)){
-               //TODO Haal uit registry ipv aanmken
-                ITournamentManager itm = new TournamentManager();
+        try {
+            if (this.authRepository.checkAuth(name, password)) {
+                ITournamentManager itm = (ITournamentManager) this.registry.lookup("TournamentManager");
                 return itm;
-            }
-            else{
+            } else {
                 return null;
             }
+        } catch (Exception e) {
+            Logger.getLogger(AuthManager.class.getName()).log(Level.SEVERE, null, e);
+        }
+        return null;
     }
+
 }

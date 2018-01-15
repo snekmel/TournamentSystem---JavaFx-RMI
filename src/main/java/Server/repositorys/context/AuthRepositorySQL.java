@@ -25,7 +25,7 @@ public class AuthRepositorySQL implements IAuthRepository {
             properties.load(propFile);
 
         }catch (Exception e){
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(AuthRepositorySQL.class.getName()).log(Level.SEVERE, null, e);
         }
 
     }
@@ -57,11 +57,12 @@ public class AuthRepositorySQL implements IAuthRepository {
             insertStatement.setString(3,a.getPassword());
 
             insertStatement.executeUpdate();
-            conn.close();
+
         }
         catch (Exception e)
         {
-            System.out.println(e);
+            Logger.getLogger(AuthRepositorySQL.class.getName()).log(Level.SEVERE, null, e);}
+            finally {
         }
 
         return a.getId();
@@ -79,7 +80,7 @@ public class AuthRepositorySQL implements IAuthRepository {
         }
         catch (Exception e)
         {
-            System.out.println(e);
+            Logger.getLogger(AuthRepositorySQL.class.getName()).log(Level.SEVERE, null, e);
         }
 
 
@@ -107,7 +108,7 @@ public class AuthRepositorySQL implements IAuthRepository {
         }
         catch (Exception e)
         {
-            System.err.println(e);
+            Logger.getLogger(AuthRepositorySQL.class.getName()).log(Level.SEVERE, null, e);
         }
         return returnList;
 
