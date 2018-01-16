@@ -187,22 +187,20 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
                     try{
                         int matchCount = this.winners.size()/2;
                         int winnerIndex = 0;
+                        boolean unEven = false;
                         if ((this.winners.size() % 2) ==1){
-                            matchCount++;
+                            unEven = true;
                         }
-
                         for (int i = 0; i <matchCount ; i++) {
                             if (this.winners.get(winnerIndex) !=null && this.winners.get(winnerIndex+1)!=null){
-                                //Match met 2 personen
                                 this.matches.add(new Match(this.winners.get(winnerIndex),this.winners.get(winnerIndex+1),this.id));
-
-                            }else if(this.winners.get(winnerIndex)!=null){
-                                //Match met 1 persoon
-                                this.matches.add(new Match(this.winners.get(winnerIndex),this.id));
                             }
                             winnerIndex++;
                             winnerIndex++;
-
+                        }
+                        if (unEven){
+                            Match match = new Match(this.winners.get(this.winners.size() - 1),this.id);
+                            this.matches.add(match);
                         }
 
                     }catch (Exception e){
@@ -255,24 +253,26 @@ public class Tournament extends UnicastRemoteObject implements ITournament,Seria
         int matchCount = this.participants.size() / 2;
         boolean unEven = false;
         if ((this.participants.size() % 2) ==1){
-            matchCount++;
+           unEven = true;
 
         }
 
         System.out.println(matchCount);
         try{
-            for (int i = 0; i <= (matchCount) ; i++) {
-                if (this.participants.get(participantsIndex) != null && this.participants.get(participantsIndex + 1) !=null){
+            for (int i = 1; i <= (matchCount) ; i++) {
+                // if (this.participants.get(participantsIndex) != null && this.participants.get(participantsIndex + 1) !=null){
+                if ((participantsIndex + 1) < this.participants.size()){
+                    System.out.println(participantsIndex + "vs" + (participantsIndex +1));
                     Match match = new Match(this.participants.get(participantsIndex),this.participants.get(participantsIndex + 1), this.id);
                     this.matches.add(match);
+                }
+            participantsIndex++;
+            participantsIndex++;
+            }
 
-                }
-                else if( this.participants.get(this.participants.size()) !=null){
-                    Match match = new Match(this.participants.get(participantsIndex - 1),this.id);
-                    this.matches.add(match);
-                }
-            participantsIndex++;
-            participantsIndex++;
+            if (unEven){
+                Match match = new Match(this.participants.get(this.participants.size() - 1),this.id);
+                this.matches.add(match);
             }
 
         }catch (Exception e){
