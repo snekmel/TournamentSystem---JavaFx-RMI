@@ -1,9 +1,6 @@
 package MatchViewClient.pages;
-
-import ConfigClient.pages.TournamentDetailsController;
 import MatchViewClient.models.ScoreboardCommunicator;
 import Server.repositorys.RegistryRepository;
-import Shared.enums.Status;
 import Shared.interfaces.IMatch;
 import Shared.interfaces.ITournament;
 import Shared.interfaces.ITournamentManager;
@@ -17,8 +14,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-
-import java.awt.*;
 import java.rmi.registry.Registry;
 import java.time.LocalTime;
 import java.util.List;
@@ -51,7 +46,7 @@ public class ScoreboardController {
     @FXML
     private ListView<String> matchesListview;
 
-    private Registry registry = RegistryRepository.getRmiRegistry();
+    private  Registry registry = RegistryRepository.getRmiRegistry();
     private ITournamentManager iTournamentManager;
     private ITournament iTournament;
     private IMatch iMatch;

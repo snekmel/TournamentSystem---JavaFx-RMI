@@ -11,12 +11,14 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TournamentManager extends UnicastRemoteObject implements ITournamentManager {
 
     private List<Tournament> Tournaments;
     private TournamentRepository tournamentRepository = new TournamentRepository(new TournamentRepositorySQL());
-    private Registry registry = RegistryRepository.getRmiRegistry();
+    private transient Registry registry = RegistryRepository.getRmiRegistry();
 
     public TournamentManager() throws RemoteException {
         this.Tournaments = tournamentRepository.getTournaments();
@@ -34,13 +36,13 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
                this.registry.bind(tournament.getId(),remotePublisher);
            }
        }catch (Exception e){
-           System.out.println(e);
+          Logger.getLogger(TournamentManager.class.getName()).log(Level.SEVERE, null, e);
        }
     }
 
     @Override
     public List<ITournament> getTournaments() throws RemoteException {
-        List<ITournament> returnList = new ArrayList<ITournament>();
+        List<ITournament> returnList = new ArrayList<>();
         for (Tournament t:this.Tournaments
              ) {
             returnList.add((ITournament)t);
@@ -68,7 +70,7 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
                 this.registry.bind(t.getId(),remotePublisher);
 
         }catch (Exception e){
-            System.out.println(e);
+           Logger.getLogger(TournamentManager.class.getName()).log(Level.SEVERE, null, e);
         }
 
         return t.getId();
@@ -100,7 +102,7 @@ public class TournamentManager extends UnicastRemoteObject implements ITournamen
            }
        }
       }catch (Exception e){
-          System.out.println(e);
+         Logger.getLogger(TournamentManager.class.getName()).log(Level.SEVERE, null, e);
       }
           return false;
     }

@@ -4,32 +4,34 @@ import Shared.enums.Status;
 import Shared.models.Participant;
 import org.junit.Test;
 
+import java.rmi.RemoteException;
+
 import static org.junit.Assert.*;
 
 public class TournamentTest {
     @Test
-    public void setOwnerName() throws Exception {
+    public void setOwnerName() throws RemoteException {
         Tournament t = new Tournament();
         t.setOwnerName("test");
         assertTrue(t.getOwnername().equals("test"));
     }
 
     @Test
-    public void setGameStatus() throws Exception {
+    public void setGameStatus() throws RemoteException {
         Tournament t = new Tournament();
         t.setGameStatus(Status.Paused);
         assertTrue(t.getGameStatus() == Status.Paused);
     }
 
     @Test
-    public void setTournamentName() throws Exception {
+    public void setTournamentName() throws RemoteException {
         Tournament t = new Tournament();
         t.setTournamentName("Test");
         assertTrue(t.getName().equals("Test"));
     }
 
     @Test
-    public void addParticipant() throws Exception {
+    public void addParticipant() throws RemoteException {
         Tournament t = new Tournament();
         t.setTournamentName("Test");
         t.addParticipant(new Participant("test1"));
@@ -38,7 +40,7 @@ public class TournamentTest {
     }
 
     @Test
-    public void getParticipants() throws Exception {
+    public void getParticipants() throws RemoteException {
         Tournament t = new Tournament();
         t.setTournamentName("Test");
         t.addParticipant(new Participant("test1"));
@@ -47,7 +49,7 @@ public class TournamentTest {
     }
 
     @Test
-    public void removeParticipant() throws Exception {
+    public void removeParticipant() throws RemoteException {
         Tournament t = new Tournament();
         t.setTournamentName("Test");
         t.addParticipant(new Participant("test1"));
@@ -61,7 +63,7 @@ public class TournamentTest {
 
 
     @Test
-    public void startTournament() throws Exception {
+    public void startTournament() throws RemoteException {
         Tournament t = new Tournament();
         t.setTournamentName("Test");
         t.addParticipant(new Participant("test1"));
@@ -75,14 +77,14 @@ public class TournamentTest {
     }
 
     @Test
-    public void finishTournament() throws Exception {
+    public void finishTournament() throws RemoteException {
 
 
     }
 
 
     @Test
-    public void getName() throws Exception {
+    public void getName() throws RemoteException {
 
         Tournament t = new Tournament();
         t.setTournamentName("Test");
@@ -90,7 +92,7 @@ public class TournamentTest {
     }
 
     @Test
-    public void getOwnername() throws Exception {
+    public void getOwnername() throws RemoteException {
         Tournament t = new Tournament();
         t.setOwnerName("Test");
         assertTrue(t.getOwnername().equals("Test"));

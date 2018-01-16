@@ -6,10 +6,8 @@ import Server.repositorys.context.TournamentRepositorySQL;
 import Shared.enums.Status;
 import Shared.interfaces.IMatch;
 import Shared.interfaces.ITournament;
-import Shared.interfaces.ITournamentManager;
 import Shared.models.Participant;
 import publisher.IRemotePublisherForDomain;
-
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;

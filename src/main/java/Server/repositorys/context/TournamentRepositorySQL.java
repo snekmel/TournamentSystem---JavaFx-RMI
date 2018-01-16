@@ -1,9 +1,7 @@
 package Server.repositorys.context;
-
 import Server.Server;
 import Server.models.Tournament;
 import Server.repositorys.interfaces.ITournamentRepository;
-
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -30,9 +28,9 @@ public class TournamentRepositorySQL implements ITournamentRepository{
 
     @Override
     public String createTournament(Tournament t) {
-        try
+        try(Connection conn = DriverManager.getConnection(this.properties.getProperty("connection"), this.properties.getProperty("user"), this.properties.getProperty("password"));
+        )
         {
-            Connection conn = DriverManager.getConnection(this.properties.getProperty("connection"), this.properties.getProperty("user"), this.properties.getProperty("password"));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(t);
@@ -48,7 +46,8 @@ public class TournamentRepositorySQL implements ITournamentRepository{
         }
         catch (Exception e)
         {
-            System.out.println(e);
+            Logger.getLogger(TournamentRepositorySQL.class.getName()).log(Level.SEVERE, null, e);
+
         }
 
         return null;
@@ -56,8 +55,8 @@ public class TournamentRepositorySQL implements ITournamentRepository{
 
     @Override
     public void deleteTournament(String key) {
-        try{
-            Connection conn = DriverManager.getConnection(this.properties.getProperty("connection"), this.properties.getProperty("user"), this.properties.getProperty("password"));
+        try(            Connection conn = DriverManager.getConnection(this.properties.getProperty("connection"), this.properties.getProperty("user"), this.properties.getProperty("password"));
+        ){
             PreparedStatement insertStatement = conn.prepareStatement("DELETE FROM Tournament WHERE `Id`=?;");
             insertStatement.setString(1,key);
             insertStatement.executeUpdate();
@@ -65,15 +64,16 @@ public class TournamentRepositorySQL implements ITournamentRepository{
         }
         catch (Exception e)
         {
-            System.out.println(e);
+            Logger.getLogger(TournamentRepositorySQL.class.getName()).log(Level.SEVERE, null, e);
+
         }
     }
 
     @Override
     public List<Tournament> getTournaments() {
         List<Tournament> returnList = new ArrayList<>();
-        try {
-            Connection conn = DriverManager.getConnection(this.properties.getProperty("connection"), this.properties.getProperty("user"), this.properties.getProperty("password"));
+        try(            Connection conn = DriverManager.getConnection(this.properties.getProperty("connection"), this.properties.getProperty("user"), this.properties.getProperty("password"));
+        ) {
 
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM tournament;");
@@ -88,7 +88,8 @@ public class TournamentRepositorySQL implements ITournamentRepository{
             conn.close();
 
         } catch (Exception ex) {
-            System.out.println(ex.toString());
+            Logger.getLogger(TournamentRepositorySQL.class.getName()).log(Level.SEVERE, null, ex);
+
         }
         return  returnList;
 
@@ -101,7 +102,8 @@ public class TournamentRepositorySQL implements ITournamentRepository{
             this.createTournament(t);
 
         }catch (Exception e){
-            System.out.println(e);
+            Logger.getLogger(TournamentRepositorySQL.class.getName()).log(Level.SEVERE, null, e);
+
         }
     }
 }
